@@ -1,6 +1,6 @@
 # EquiLoad
 
-EquiLoad is an optional native HDF5 graph loader for [Equitrain](https://github.com/lutfia95/equitrain) and PyTorch Geometric. It reads Equitrain trajectory files and returns ordinary PyG batches. EquiLoad accelerates CPU-side HDF5 reads and graph construction; models and GPU transfer remain PyTorch's responsibility.
+EquiLoad is an optional native HDF5 graph loader for [Equitrain](https://github.com/BAMeScience/equitrain) and PyTorch Geometric. It reads Equitrain trajectory files and returns ordinary PyG batches. EquiLoad accelerates CPU-side HDF5 reads and graph construction; models and GPU transfer remain PyTorch's responsibility.
 
 ## Install
 
@@ -16,7 +16,7 @@ files. On Ubuntu:
 ```bash
 sudo apt-get install build-essential libhdf5-dev
 python -m pip install 'equitrain[torch]'
-git clone https://github.com/lutfia95/RTorch.git equiload
+git clone https://github.com/BAMeScience/EquiLoad.git equiload
 cd equiload
 bash scripts/install-python.sh --venv /path/to/equitrain/.venv
 ```
@@ -78,6 +78,10 @@ for batches in loader:
 ```
 
 The supported public API consists only of `HDF5GraphDataset`, `HDF5GraphDatasetCollection`, and `HDF5GraphLoader`.
+
+For collections and loaders built from multiple files, `idx` is the global
+sample index in the concatenated dataset. It keeps the same value when samples
+are shuffled, split into sub-batches, or filtered by graph-size limits.
 
 ## Development
 

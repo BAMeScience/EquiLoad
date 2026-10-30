@@ -58,10 +58,30 @@ class EquiLoadGraphLoaderTest(unittest.TestCase):
                     for _ in range(2)
                 ]
                 self.assertEqual(epochs[0], epochs[1])
-                expected = list(range(length)) * 2
+                expected = list(range(length * 2))
                 count = len(expected) // 5 * 5 if drop_last else len(expected)
                 self.assertEqual(len(epochs[0]), count)
                 if not shuffle:
                     self.assertEqual(epochs[0], expected[:count])
                 elif not drop_last:
                     self.assertCountEqual(epochs[0], expected)
+
+    def test_collection_indices_are_global_including_negative_access(self):
+        import h5py
+        import equiload
+
+        fixture = Path(__file__).resolve().parents[3] / "test_data" / "train.h5"
+        with h5py.File(fixture) as handle:
+            numbers = sorted(set(handle["atomic_numbers"][:].tolist()))
+            length = len(handle["structures"])
+        dataset = equiload.HDF5GraphDatasetCollection.from_hdf5_files(
+            [str(fixture), str(fixture)], 5.0, numbers
+        )
+        try:
+            self.assertEqual(len(dataset), length * 2)
+            for index in range(len(dataset)):
+                self.assertEqual(dataset[index].idx, index)
+            self.assertEqual(dataset[-1].idx, length * 2 - 1)
+            self.assertEqual(dataset[-length].idx, length)
+        finally:
+            dataset.close()

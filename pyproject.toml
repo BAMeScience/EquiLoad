@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/lutfia95/RTorch"
+Repository = "https://github.com/BAMeScience/EquiLoad"
 
 [tool.maturin]
 manifest-path = "crates/equiload-python/Cargo.toml"

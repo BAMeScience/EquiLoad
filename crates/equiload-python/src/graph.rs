@@ -890,9 +890,18 @@ impl PyHDF5GraphDatasetCollection {
         (insertion, index - self.offsets[insertion])
     }
 
-    fn graph_at(&self, py: Python<'_>, index: usize) -> PyResult<PyObject> {
+    fn prepare_graph(&self, py: Python<'_>, index: usize) -> PyResult<PreparedGraph> {
         let (dataset_index, local_index) = self.dataset_for_index(index);
-        self.datasets[dataset_index].graph_at(py, local_index)
+        let mut graph = self.datasets[dataset_index].prepare_graph(py, local_index)?;
+        // Consumers use idx to address the whole collection, including after
+        // shuffling, dynamic splitting, and dropping oversized graphs.
+        graph.index = index;
+        Ok(graph)
+    }
+
+    fn graph_at(&self, py: Python<'_>, index: usize) -> PyResult<PyObject> {
+        let graph = self.prepare_graph(py, index)?;
+        materialize_graphs(py, vec![graph], false)
     }
 }
 
@@ -1084,8 +1093,7 @@ impl PyHDF5GraphLoader {
             } else {
                 position
             };
-            let (dataset_index, local_index) = dataset.dataset_for_index(index);
-            dataset.datasets[dataset_index].prepare_graph(py, local_index)
+            dataset.prepare_graph(py, index)
         });
         let result = pack_dynamic_batches(py, graphs, self.max_nodes, self.max_edges, self.drop)?;
         self.cursor = end;

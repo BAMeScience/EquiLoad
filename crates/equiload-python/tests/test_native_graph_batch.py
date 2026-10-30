@@ -267,7 +267,7 @@ class NativeGraphBatchTest(unittest.TestCase):
             )
             self.assertEqual(
                 [int(i) for outer in loader for batch in outer for i in batch.idx],
-                list(range(length)) * 2,
+                list(range(length * 2)),
             )
 
     def test_optional_metadata_defaults_and_values(self):
